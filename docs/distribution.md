@@ -4,13 +4,20 @@ This is the active distribution plan for ZCode-supervisor.
 
 ## Decision
 
-Primary install path:
+Current public install path, until the first PyPI release:
+
+```bash
+uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+  zcode-install-repo /absolute/path/to/target-repo
+```
+
+Primary install path after PyPI release:
 
 ```bash
 uvx --from zcode-supervisor zcode-install-repo /absolute/path/to/target-repo
 ```
 
-Persistent tool install path:
+Persistent tool install path after PyPI release:
 
 ```bash
 uv tool install zcode-supervisor
@@ -62,12 +69,14 @@ environment plus `id-token: write`, and publish only after Aki approves.
 
 1. Install ZCode from the official ZCode docs and sign in.
 2. Install `uv` if needed.
-3. Run `uvx --from zcode-supervisor zcode-install-repo <target-repo>`.
+3. Run `uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git
+   zcode-install-repo <target-repo>` until PyPI is live.
 4. Run `zcode-auto-route --workspace <target-repo> --objective "setup smoke check"`.
 5. Start real delegated tasks only after Codex chooses allowed files and
    validation.
 
-Useful preflight commands after `uv tool install zcode-supervisor`:
+Useful preflight commands after the PyPI package is installed with
+`uv tool install zcode-supervisor`:
 
 ```bash
 zcodectl cli-preflight

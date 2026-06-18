@@ -22,17 +22,17 @@ This repository is not affiliated with Z.AI or ZCode.
 
 ## Quick Start
 
-The recommended public setup path is `uvx`:
+The current public setup path is `uvx` from this GitHub repo:
+
+```bash
+uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+  zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
+```
+
+After the first PyPI release, the shorter package command will be:
 
 ```bash
 uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
-```
-
-For repeated use, install the tool once:
-
-```bash
-uv tool install zcode-supervisor
-zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
 ```
 
 Then check the routing decision before the first delegated task:
@@ -90,7 +90,7 @@ Rules:
 
 Steps:
 1. Confirm TARGET_REPO exists and is a git repository.
-2. Prefer the published tool path. If `uvx --version` works, set
+2. Prefer the public GitHub-backed `uvx` path. If `uvx --version` works, set
    INSTALLER_MODE=uvx and do not clone anything. If `uvx` is missing, show this
    official install link and continue with the source fallback:
    https://docs.astral.sh/uv/getting-started/installation/
@@ -107,7 +107,8 @@ Steps:
 5. Verify ZCode is installed or give me this official install link:
    https://zcode.z.ai/en/docs/install
 6. Run the target repo installer from Terminal or shell. If INSTALLER_MODE=uvx:
-   uvx --from zcode-supervisor zcode-install-repo "$TARGET_REPO"
+   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+     zcode-install-repo "$TARGET_REPO"
    Otherwise run the source fallback:
    python3 "$SUPERVISOR_REPO/tools/zcode_supervisor/zcode_supervisor.py" install-repo \
      --repo "$TARGET_REPO" \
@@ -118,7 +119,8 @@ Steps:
    - .agents/mcp.json
    - AGENTS.md
 8. Run a dry route check. If INSTALLER_MODE=uvx:
-   uvx --from zcode-supervisor zcode-auto-route \
+   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+     zcode-auto-route \
      --workspace "$TARGET_REPO" \
      --objective "setup smoke check"
    Otherwise run:
@@ -126,8 +128,10 @@ Steps:
      --workspace "$TARGET_REPO" \
      --objective "setup smoke check"
 9. If possible, run preflight. If INSTALLER_MODE=uvx:
-   uvx --from zcode-supervisor zcodectl cli-preflight
-   uvx --from zcode-supervisor zcodectl vision-preflight --workspace "$TARGET_REPO"
+   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+     zcodectl cli-preflight
+   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+     zcodectl vision-preflight --workspace "$TARGET_REPO"
    Otherwise run:
    node "$SUPERVISOR_REPO/tools/zcode_control/zcodectl.mjs" cli-preflight
    node "$SUPERVISOR_REPO/tools/zcode_control/zcodectl.mjs" vision-preflight --workspace "$TARGET_REPO"
@@ -238,17 +242,17 @@ If your supervisor repo lives somewhere else, replace
 
 ### Primary Install Path
 
-The public setup path is `uvx`:
+The current public setup path is `uvx` from this GitHub repo:
+
+```bash
+uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+  zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
+```
+
+After the first PyPI release, the shorter package command will be:
 
 ```bash
 uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
-```
-
-For repeated use:
-
-```bash
-uv tool install zcode-supervisor
-zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
 ```
 
 The PyPI package is published through Trusted Publishing, without long-lived
