@@ -4,20 +4,13 @@ This is the active distribution plan for ZCode-supervisor.
 
 ## Decision
 
-Current public install path, until the first PyPI release:
-
-```bash
-uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
-  zcode-install-repo /absolute/path/to/target-repo
-```
-
-Primary install path after PyPI release:
+Current primary public install path:
 
 ```bash
 uvx --from zcode-supervisor zcode-install-repo /absolute/path/to/target-repo
 ```
 
-Persistent tool install path after PyPI release:
+Persistent tool install path:
 
 ```bash
 uv tool install zcode-supervisor
@@ -72,9 +65,9 @@ environment plus `id-token: write`, and publish only after Aki approves.
 
 1. Install ZCode from the official ZCode docs and sign in.
 2. Install `uv` if needed.
-3. Run `uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git
-   zcode-install-repo <target-repo>` until PyPI is live.
-4. Run `zcode-auto-route --workspace <target-repo> --objective "setup smoke check"`.
+3. Run `uvx --from zcode-supervisor zcode-install-repo <target-repo>`.
+4. Run
+   `uvx --from zcode-supervisor zcode-auto-route --workspace <target-repo> --objective "setup smoke check"`.
 5. Start real delegated tasks only after Codex chooses allowed files and
    validation.
 
@@ -93,7 +86,7 @@ zcodectl vision-preflight --workspace /absolute/path/to/target-repo
 3. Build and inspect the wheel locally.
 4. Tag from the clean public repo after approval.
 5. Run the PyPI workflow in `build-only` mode.
-6. Configure pending Trusted Publishers on TestPyPI and PyPI; see
+6. Ensure Trusted Publishers exist on TestPyPI and PyPI; see
    [pypi-trusted-publisher.md](pypi-trusted-publisher.md).
 7. Run `scripts/check-pypi-release-readiness --target testpypi
    --trusted-publishers-configured`.

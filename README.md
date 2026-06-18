@@ -22,14 +22,7 @@ This repository is not affiliated with Z.AI or ZCode.
 
 ## Quick Start
 
-The current public setup path is `uvx` from this GitHub repo:
-
-```bash
-uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
-  zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
-```
-
-After the first PyPI release, the shorter package command will be:
+The current public setup path is the PyPI package through `uvx`:
 
 ```bash
 uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
@@ -38,7 +31,7 @@ uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REP
 Then check the routing decision before the first delegated task:
 
 ```bash
-zcode-auto-route \
+uvx --from zcode-supervisor zcode-auto-route \
   --workspace /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO \
   --objective "setup smoke check"
 ```
@@ -90,7 +83,7 @@ Rules:
 
 Steps:
 1. Confirm TARGET_REPO exists and is a git repository.
-2. Prefer the public GitHub-backed `uvx` path. If `uvx --version` works, set
+2. Prefer the public PyPI-backed `uvx` path. If `uvx --version` works, set
    INSTALLER_MODE=uvx and do not clone anything. If `uvx` is missing, show this
    official install link and continue with the source fallback:
    https://docs.astral.sh/uv/getting-started/installation/
@@ -107,7 +100,7 @@ Steps:
 5. Verify ZCode is installed or give me this official install link:
    https://zcode.z.ai/en/docs/install
 6. Run the target repo installer from Terminal or shell. If INSTALLER_MODE=uvx:
-   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+   uvx --from zcode-supervisor \
      zcode-install-repo "$TARGET_REPO"
    Otherwise run the source fallback:
    python3 "$SUPERVISOR_REPO/tools/zcode_supervisor/zcode_supervisor.py" install-repo \
@@ -119,7 +112,7 @@ Steps:
    - .agents/mcp.json
    - AGENTS.md
 8. Run a dry route check. If INSTALLER_MODE=uvx:
-   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+   uvx --from zcode-supervisor \
      zcode-auto-route \
      --workspace "$TARGET_REPO" \
      --objective "setup smoke check"
@@ -128,9 +121,9 @@ Steps:
      --workspace "$TARGET_REPO" \
      --objective "setup smoke check"
 9. If possible, run preflight. If INSTALLER_MODE=uvx:
-   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+   uvx --from zcode-supervisor \
      zcodectl cli-preflight
-   uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
+   uvx --from zcode-supervisor \
      zcodectl vision-preflight --workspace "$TARGET_REPO"
    Otherwise run:
    node "$SUPERVISOR_REPO/tools/zcode_control/zcodectl.mjs" cli-preflight
@@ -242,21 +235,14 @@ If your supervisor repo lives somewhere else, replace
 
 ### Primary Install Path
 
-The current public setup path is `uvx` from this GitHub repo:
-
-```bash
-uvx --from git+https://github.com/AkiGarage/ZCode-supervisor.git \
-  zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
-```
-
-After the first PyPI release, the shorter package command will be:
+The current public setup path is the PyPI package through `uvx`:
 
 ```bash
 uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
 ```
 
-The PyPI package will be published through Trusted Publishing, without
-long-lived PyPI tokens. High-assurance users can also download the current
+The PyPI package is published through Trusted Publishing, without long-lived
+PyPI tokens. High-assurance users can also download the current
 GitHub Release archive, `v0.0.1`, verify `SHA256SUMS`, and run
 `gh attestation verify` before using it. Homebrew is archived for now; see
 [docs/distribution.md](docs/distribution.md).
@@ -283,7 +269,7 @@ implementation through `zcodectl run-packet`.
 Use a dry run before implementation work:
 
 ```bash
-zcode-auto-route \
+uvx --from zcode-supervisor zcode-auto-route \
   --workspace /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO \
   --objective "Fix the failing ledger summary test."
 ```
@@ -300,7 +286,7 @@ Typical results:
 After Codex has chosen a tight edit scope and validation command:
 
 ```bash
-zcode-auto-route \
+uvx --from zcode-supervisor zcode-auto-route \
   --workspace /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO \
   --objective "Fix the failing ledger summary test." \
   --allowed src/ledger.js \
@@ -426,7 +412,7 @@ Installed repos default to `routing_mode: auto`. Future Codex sessions should
 run the route check before implementation edits:
 
 ```bash
-zcode-auto-route \
+uvx --from zcode-supervisor zcode-auto-route \
   --workspace /path/to/target-repo \
   --objective "Fix the failing ledger summary test."
 ```
@@ -435,12 +421,14 @@ This check is optional when you already know the task should run through ZCode;
 it is mainly a dry-run for inspecting the route decision. You do not need to run
 all three setup/check/execute commands for every task:
 
-- First-time setup: run `zcode-install-repo /path/to/target-repo` once.
-- Route inspection: run `zcode-auto-route --workspace ... --objective ...`
+- First-time setup: run
+  `uvx --from zcode-supervisor zcode-install-repo /path/to/target-repo` once.
+- Route inspection: run
+  `uvx --from zcode-supervisor zcode-auto-route --workspace ... --objective ...`
   when you want to see the JSON decision.
-- Real delegated implementation: run `zcode-auto-route ... --allowed ...
-  --validation ... --execute` after Codex has selected the file scope and
-  validation command.
+- Real delegated implementation: run
+  `uvx --from zcode-supervisor zcode-auto-route ... --allowed ... --validation ... --execute`
+  after Codex has selected the file scope and validation command.
 
 If the user explicitly says "use ZCode", "have ZCode do it", or similar, Codex should
 treat that as an instruction to use this ZCode-supervisor flow for bounded
@@ -462,7 +450,7 @@ decisions:
 For normal implementation after Codex has selected allowed files and validation:
 
 ```bash
-zcode-auto-route \
+uvx --from zcode-supervisor zcode-auto-route \
   --workspace /path/to/target-repo \
   --objective "Fix the failing ledger summary test." \
   --allowed src/ledger.js \

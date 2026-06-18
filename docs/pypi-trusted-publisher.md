@@ -10,21 +10,26 @@ not add PyPI API tokens to GitHub secrets.
 - Current version: `0.0.1`
 - Current tag: `v0.0.1`
 - Release archive: `https://github.com/AkiGarage/ZCode-supervisor/releases/tag/v0.0.1`
-- TestPyPI status: not published yet
-- PyPI status: not published yet
+- TestPyPI status: `0.0.1` published
+- PyPI status: `0.0.1` published
 - Homebrew: archived
 
-The first TestPyPI upload already built and attested the wheel/sdist, then
-failed safely with `invalid-publisher`. That means TestPyPI did not have a
-matching pending Trusted Publisher for this GitHub OIDC claim:
+The first TestPyPI upload before publisher setup built and attested the
+wheel/sdist, then failed safely with `invalid-publisher`. After pending
+publishers were configured, `0.0.1` was published to both TestPyPI and PyPI
+through GitHub OIDC and Trusted Publishing.
+
+The required GitHub OIDC claim shape is:
 
 ```text
 repo:AkiGarage/ZCode-supervisor:environment:testpypi
 ```
 
-## Manual Setup
+## Manual Setup For New Maintainers
 
-Create a pending publisher in TestPyPI account settings:
+The current project already has working publishers. For a new package,
+organization, or replacement account, create a pending publisher in TestPyPI
+account settings:
 
 ```text
 Project name: zcode-supervisor
@@ -44,38 +49,41 @@ Workflow filename: pypi-publish.yml
 Environment name: pypi
 ```
 
-Pending publishers do not reserve the package name until first publish. Run the
-TestPyPI publish soon after setup.
+Pending publishers do not reserve the package name until first publish.
 
-## Preflight
+## Preflight For The Next Version
 
-Before retrying TestPyPI, run:
+Before retrying TestPyPI for a new version, set the tag you are releasing:
 
 ```bash
-scripts/check-pypi-release-readiness --target testpypi
+TAG=v0.0.2
 ```
 
-It should stop with a manual action until both pending publishers are configured.
-After manually creating them, run:
+Then run:
 
 ```bash
 scripts/check-pypi-release-readiness \
   --target testpypi \
+  --tag "$TAG" \
+  --version "${TAG#v}" \
   --trusted-publishers-configured
 ```
 
 The command must print `"safe_to_dispatch": true` before dispatching the
 workflow.
 
-## TestPyPI Publish
+## TestPyPI Publish For A New Version
 
-Dispatch only from the tag:
+For `v0.0.1`, the tag predates the later workflow guard input, so the
+successful historical run used only `tag` and `publish_target`. Future tags
+should be created after the guarded workflow is present, then dispatched from
+the tag with the guarded input:
 
 ```bash
 gh workflow run pypi-publish.yml \
   -R AkiGarage/ZCode-supervisor \
-  --ref v0.0.1 \
-  -f tag=v0.0.1 \
+  --ref "$TAG" \
+  -f tag="$TAG" \
   -f publish_target=testpypi \
   -f trusted_publishers_configured=true
 ```
@@ -92,13 +100,14 @@ After success, verify TestPyPI:
 ```bash
 curl -fsS https://test.pypi.org/pypi/zcode-supervisor/json | jq '.info.version'
 uvx --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
   --from zcode-supervisor \
   zcode-install-repo --help
 ```
 
-## PyPI Publish
+## PyPI Publish For A New Version
 
-Do not publish to PyPI until TestPyPI shows version `0.0.1` and the install
+Do not publish to PyPI until TestPyPI shows the new version and the install
 smoke test passes.
 
 Before PyPI, run:
@@ -106,6 +115,8 @@ Before PyPI, run:
 ```bash
 scripts/check-pypi-release-readiness \
   --target pypi \
+  --tag "$TAG" \
+  --version "${TAG#v}" \
   --trusted-publishers-configured
 ```
 
@@ -117,8 +128,8 @@ The `pypi` GitHub environment is restricted to `v*` tags and requires
 ```bash
 gh workflow run pypi-publish.yml \
   -R AkiGarage/ZCode-supervisor \
-  --ref v0.0.1 \
-  -f tag=v0.0.1 \
+  --ref "$TAG" \
+  -f tag="$TAG" \
   -f publish_target=pypi \
   -f trusted_publishers_configured=true
 ```
