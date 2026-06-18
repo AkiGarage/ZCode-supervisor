@@ -16,6 +16,11 @@ on:
           - build-only
           - testpypi
           - pypi
+      trusted_publishers_configured:
+        description: "Required for publish targets after pending publishers are configured in PyPI/TestPyPI"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -76,10 +81,80 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  preflight-testpypi:
+    name: Check TestPyPI release readiness
+    if: inputs.publish_target == 'testpypi'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Require manual Trusted Publisher confirmation
+        if: inputs.trusted_publishers_configured != true
+        run: |
+          scripts/check-pypi-release-readiness --target testpypi || true
+          echo "::error::Set trusted_publishers_configured=true only after creating pending publishers on TestPyPI and PyPI."
+          exit 1
+
+      - name: Run TestPyPI readiness preflight
+        run: |
+          scripts/check-pypi-release-readiness \
+            --target testpypi \
+            --tag "$TAG" \
+            --version "${TAG#v}" \
+            --trusted-publishers-configured
+
+  preflight-pypi:
+    name: Check PyPI release readiness
+    if: inputs.publish_target == 'pypi'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Require manual Trusted Publisher confirmation
+        if: inputs.trusted_publishers_configured != true
+        run: |
+          scripts/check-pypi-release-readiness --target pypi || true
+          echo "::error::Set trusted_publishers_configured=true only after TestPyPI is verified and the PyPI pending publisher exists."
+          exit 1
+
+      - name: Run PyPI readiness preflight
+        run: |
+          scripts/check-pypi-release-readiness \
+            --target pypi \
+            --tag "$TAG" \
+            --version "${TAG#v}" \
+            --trusted-publishers-configured
+
   publish-testpypi:
     name: Publish to TestPyPI
     if: inputs.publish_target == 'testpypi'
-    needs: build
+    needs:
+      - build
+      - preflight-testpypi
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -102,7 +177,9 @@ jobs:
   publish-pypi:
     name: Publish to PyPI
     if: inputs.publish_target == 'pypi'
-    needs: build
+    needs:
+      - build
+      - preflight-pypi
     runs-on: ubuntu-latest
     environment:
       name: pypi

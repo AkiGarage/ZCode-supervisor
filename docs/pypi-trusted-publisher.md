@@ -76,7 +76,8 @@ gh workflow run pypi-publish.yml \
   -R AkiGarage/ZCode-supervisor \
   --ref v0.0.1 \
   -f tag=v0.0.1 \
-  -f publish_target=testpypi
+  -f publish_target=testpypi \
+  -f trusted_publishers_configured=true
 ```
 
 Watch the run:
@@ -118,7 +119,8 @@ gh workflow run pypi-publish.yml \
   -R AkiGarage/ZCode-supervisor \
   --ref v0.0.1 \
   -f tag=v0.0.1 \
-  -f publish_target=pypi
+  -f publish_target=pypi \
+  -f trusted_publishers_configured=true
 ```
 
 After success, verify:
