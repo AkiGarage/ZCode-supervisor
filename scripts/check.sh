@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 -m unittest tests/test_zcode_supervisor.py tests/test_zcode_repo_setup.py tests/test_zcode_eval.py tests/test_zcode_release.py tests/test_homebrew_formula.py tests/test_distribution_packaging.py
-python3 -m py_compile tools/zcode_supervisor/zcode_supervisor.py tools/zcode_supervisor/repo_setup.py tools/zcode_supervisor/auto_route.py tools/zcode_eval/zcode_eval.py tools/zcode_eval/zcode_release.py tools/zcode_control/__init__.py scripts/zcode-install-repo scripts/zcode-auto-route scripts/update-homebrew-formula scripts/verify-python-wheel
+python3 -m unittest tests/test_zcode_supervisor.py tests/test_zcode_repo_setup.py tests/test_zcode_eval.py tests/test_zcode_release.py tests/test_homebrew_formula.py tests/test_distribution_packaging.py tests/test_pypi_readiness.py
+python3 -m py_compile tools/zcode_supervisor/zcode_supervisor.py tools/zcode_supervisor/repo_setup.py tools/zcode_supervisor/auto_route.py tools/zcode_eval/zcode_eval.py tools/zcode_eval/zcode_release.py tools/zcode_eval/pypi_readiness.py tools/zcode_control/__init__.py scripts/zcode-install-repo scripts/zcode-auto-route scripts/update-homebrew-formula scripts/verify-python-wheel scripts/check-pypi-release-readiness
 ruby -c packaging/homebrew/zcode-supervisor.rb >/dev/null
 node --check tools/zcode_control/zcodectl.mjs
 node --check tools/zcode_control/browser_scripts.mjs

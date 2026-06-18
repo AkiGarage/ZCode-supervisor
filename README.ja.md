@@ -254,6 +254,9 @@ PyPI package は long-lived PyPI token ではなく Trusted Publishing で publi
 `SHA256SUMS` と `gh attestation verify` で検証してから使えます。Homebrew は
 一旦 archived 扱いです。[docs/distribution.md](docs/distribution.md) を参照してください。
 
+maintainer は TestPyPI / PyPI publish 前に
+[docs/pypi-trusted-publisher.md](docs/pypi-trusted-publisher.md) を使ってください。
+
 ### 4. target repo に書かれたものを確認する
 
 installer は target repo の中に次を作ります。

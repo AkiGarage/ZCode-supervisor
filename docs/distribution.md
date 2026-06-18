@@ -93,9 +93,15 @@ zcodectl vision-preflight --workspace /absolute/path/to/target-repo
 3. Build and inspect the wheel locally.
 4. Tag from the clean public repo after approval.
 5. Run the PyPI workflow in `build-only` mode.
-6. Publish to TestPyPI after approval and verify install with `uvx`.
-7. Publish to PyPI after approval.
-8. Run the GitHub Release artifact workflow and publish the attested archive for
+6. Configure pending Trusted Publishers on TestPyPI and PyPI; see
+   [pypi-trusted-publisher.md](pypi-trusted-publisher.md).
+7. Run `scripts/check-pypi-release-readiness --target testpypi
+   --trusted-publishers-configured`.
+8. Publish to TestPyPI after approval and verify install with `uvx`.
+9. Run `scripts/check-pypi-release-readiness --target pypi
+   --trusted-publishers-configured`.
+10. Publish to PyPI after approval.
+11. Run the GitHub Release artifact workflow and publish the attested archive for
    high-assurance users.
 
 No step above should rename repos, change visibility, push tags, publish PyPI,
@@ -107,5 +113,7 @@ or publish GitHub Releases without explicit Aki approval.
 - uv installation: https://docs.astral.sh/uv/getting-started/installation/
 - PyPI Trusted Publishing: https://docs.pypi.org/trusted-publishers/
 - Publishing with a Trusted Publisher: https://docs.pypi.org/trusted-publishers/using-a-publisher/
+- Creating a PyPI project with a Trusted Publisher: https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/
+- PyPI Trusted Publisher troubleshooting: https://docs.pypi.org/trusted-publishers/troubleshooting/
 - PyPI attestations: https://docs.pypi.org/attestations/
 - GitHub artifact attestations: https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds

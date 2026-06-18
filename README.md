@@ -261,6 +261,10 @@ GitHub Release archive, `v0.0.1`, verify `SHA256SUMS`, and run
 `gh attestation verify` before using it. Homebrew is archived for now; see
 [docs/distribution.md](docs/distribution.md).
 
+Maintainers should use
+[docs/pypi-trusted-publisher.md](docs/pypi-trusted-publisher.md) before any
+TestPyPI or PyPI publish attempt.
+
 ### 4. Confirm What Was Written
 
 The installer writes these files inside the target repo:
