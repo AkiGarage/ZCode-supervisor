@@ -1,0 +1,91 @@
+name: Verified release artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag, for example v0.0.2"
+        required: true
+        type: string
+      create_draft_release:
+        description: "Create a draft GitHub Release and upload verified installer assets"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  attestations: write
+  contents: write
+  id-token: write
+
+jobs:
+  build-attest-release-artifacts:
+    name: Build attested GitHub Release archive
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate tag format
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "tag must look like v0.0.2" >&2
+            exit 1
+          fi
+          git show-ref --verify --quiet "refs/tags/${TAG}"
+          git rev-parse -q --verify "refs/tags/${TAG}^{commit}" >/dev/null
+
+      - name: Run release checks
+        run: bash scripts/check.sh
+
+      - name: Build source archive and checksums
+        run: |
+          mkdir -p dist
+          artifact="zcode-supervisor-${TAG}.tar.gz"
+          git archive --format=tar.gz --prefix="zcode-supervisor-${TAG}/" -o "dist/${artifact}" HEAD
+          (cd dist && shasum -a 256 "${artifact}" > SHA256SUMS)
+          echo "ARTIFACT=${artifact}" >> "$GITHUB_ENV"
+
+      - name: Attest release archive
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/${{ env.ARTIFACT }}
+
+      - name: Attest checksums
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/SHA256SUMS
+
+      - name: Verify archive attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify "dist/${ARTIFACT}" -R "$GITHUB_REPOSITORY"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zcode-supervisor-${{ inputs.tag }}-release-assets
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Create draft GitHub Release
+        if: inputs.create_draft_release == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$TAG" dist/* \
+            --draft \
+            --verify-tag \
+            --title "ZCode-supervisor ${TAG}" \
+            --notes "Draft verified installer assets. Verify SHA256SUMS and GitHub artifact attestations before publishing."

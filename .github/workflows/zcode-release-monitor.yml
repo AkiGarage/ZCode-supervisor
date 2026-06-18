@@ -1,0 +1,74 @@
+name: ZCode release monitor
+
+on:
+  schedule:
+    - cron: "17 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-zcode-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check official ZCode release
+        id: release
+        run: |
+          python3 tools/zcode_eval/zcode_release.py check \
+            --baseline config/zcode-release-baseline.json \
+            --json-out .local/zcode-release-check.json \
+            --markdown-out .local/zcode-release-check.md \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Run supervisor validation
+        run: bash scripts/check.sh
+
+      - name: Open update issue
+        if: steps.release.outputs.update_available == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const title = process.env.ISSUE_TITLE;
+            const releaseBody = fs.readFileSync(".local/zcode-release-check.md", "utf8");
+            const body = [
+              releaseBody,
+              "",
+              "## Required Follow-Up",
+              "",
+              "- Review the official changelog for supervisor impact.",
+              "- Update quota/token extraction if the Usage Stats UI changed.",
+              "- Update `config/zcode-release-baseline.json` after compatibility work lands.",
+              "- Run `bash scripts/check.sh` and record any ZCode app validation notes.",
+            ].join("\n");
+            const query = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:title "${title}"`;
+            const existing = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 1 });
+            if (existing.data.items.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data.items[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+            }
+        env:
+          ISSUE_TITLE: ${{ steps.release.outputs.issue_title }}

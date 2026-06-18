@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zcode-supervisor"
+version = "0.0.1"
+description = "Codex-side supervisor tooling for safely delegating bounded coding tasks to ZCode."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  { name = "ZCode-supervisor contributors" }
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/AkiGarage/ZCode-supervisor"
+Source = "https://github.com/AkiGarage/ZCode-supervisor"
+Issues = "https://github.com/AkiGarage/ZCode-supervisor/issues"
+Documentation = "https://github.com/AkiGarage/ZCode-supervisor#readme"
+
+[project.scripts]
+zcode-supervisor = "tools.zcode_supervisor.zcode_supervisor:main"
+zcode-install-repo = "tools.zcode_supervisor.repo_setup:install_repo_entrypoint"
+zcode-auto-route = "tools.zcode_supervisor.auto_route:auto_route_entrypoint"
+zcode-eval = "tools.zcode_eval.zcode_eval:main"
+zcode-release-check = "tools.zcode_eval.zcode_release:main"
+zcodectl = "tools.zcode_control:main"
+
+[tool.setuptools.packages.find]
+include = ["tools*"]
+
+[tool.setuptools.package-data]
+"tools.zcode_control" = ["*.mjs"]

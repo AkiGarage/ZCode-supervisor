@@ -1,0 +1,15 @@
+{
+  "name": "zcode-supervisor",
+  "version": "0.0.1",
+  "description": "Codex-side supervisor tooling for safely delegating bounded coding tasks to ZCode.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "check": "bash scripts/check.sh",
+    "test": "python3 -m unittest tests/test_zcode_supervisor.py tests/test_zcode_repo_setup.py tests/test_zcode_eval.py tests/test_zcode_release.py"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

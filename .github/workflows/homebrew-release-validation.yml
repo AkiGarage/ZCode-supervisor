@@ -1,0 +1,38 @@
+name: Archived Homebrew validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-homebrew-release-prep:
+    name: Validate archived Homebrew packaging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run supervisor checks
+        run: bash scripts/check.sh
+
+      - name: Check Homebrew formula Ruby syntax
+        run: ruby -c packaging/homebrew/zcode-supervisor.rb
+
+      - name: Smoke formula updater
+        run: |
+          mkdir -p .local/formula-smoke
+          tar -czf .local/formula-smoke/zcode-supervisor-v0.0.2.tar.gz README.md LICENSE pyproject.toml
+          python3 scripts/update-homebrew-formula \
+            --version v0.0.2 \
+            --artifact .local/formula-smoke/zcode-supervisor-v0.0.2.tar.gz \
+            --formula packaging/homebrew/zcode-supervisor.rb \
+            --dry-run

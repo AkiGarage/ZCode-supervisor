@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""Verify that a built zcode-supervisor wheel contains required runtime files."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import zipfile
+from pathlib import Path
+
+
+REQUIRED_FILES = {
+    "tools/zcode_control/__init__.py",
+    "tools/zcode_control/browser_scripts.mjs",
+    "tools/zcode_control/provider_errors.mjs",
+    "tools/zcode_control/zcodectl.mjs",
+    "tools/zcode_supervisor/zcode_supervisor.py",
+    "tools/zcode_supervisor/repo_setup.py",
+    "tools/zcode_supervisor/auto_route.py",
+    "tools/zcode_eval/zcode_eval.py",
+    "tools/zcode_eval/zcode_release.py",
+}
+
+REQUIRED_ENTRY_POINTS = {
+    "zcode-supervisor = tools.zcode_supervisor.zcode_supervisor:main",
+    "zcode-install-repo = tools.zcode_supervisor.repo_setup:install_repo_entrypoint",
+    "zcode-auto-route = tools.zcode_supervisor.auto_route:auto_route_entrypoint",
+    "zcode-eval = tools.zcode_eval.zcode_eval:main",
+    "zcode-release-check = tools.zcode_eval.zcode_release:main",
+    "zcodectl = tools.zcode_control:main",
+}
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("wheel", type=Path)
+    return parser.parse_args(argv)
+
+
+def find_entry_points(names: set[str]) -> str:
+    matches = [name for name in names if name.endswith(".dist-info/entry_points.txt")]
+    if len(matches) != 1:
+        raise ValueError(f"expected one entry_points.txt, found {len(matches)}")
+    return matches[0]
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv or sys.argv[1:])
+    try:
+        if not args.wheel.is_file():
+            raise ValueError(f"wheel does not exist: {args.wheel}")
+        if args.wheel.suffix != ".whl":
+            raise ValueError(f"not a wheel path: {args.wheel}")
+        with zipfile.ZipFile(args.wheel) as archive:
+            names = set(archive.namelist())
+            missing_files = sorted(REQUIRED_FILES - names)
+            entry_points_name = find_entry_points(names)
+            entry_points = archive.read(entry_points_name).decode("utf-8")
+        missing_entry_points = sorted(
+            entry for entry in REQUIRED_ENTRY_POINTS if entry not in entry_points
+        )
+        ok = not missing_files and not missing_entry_points
+        payload = {
+            "ok": ok,
+            "wheel": str(args.wheel),
+            "missing_files": missing_files,
+            "missing_entry_points": missing_entry_points,
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0 if ok else 1
+    except (OSError, ValueError, zipfile.BadZipFile) as exc:
+        print(json.dumps({"ok": False, "error": str(exc)}, indent=2, sort_keys=True), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

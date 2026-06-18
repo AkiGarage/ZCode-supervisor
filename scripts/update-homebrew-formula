@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Update the Homebrew formula from a release artifact checksum."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+DEFAULT_FORMULA = Path("packaging/homebrew/zcode-supervisor.rb")
+DEFAULT_OWNER_REPO = "AkiGarage/ZCode-supervisor"
+FORMULA_SHA_PLACEHOLDER = "0" * 64
+SEMVER_TAG = re.compile(r"^v?(?P<version>\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$")
+
+
+def normalize_version(raw: str) -> tuple[str, str]:
+    match = SEMVER_TAG.match(raw.strip())
+    if not match:
+        raise ValueError(f"version must look like v0.0.2 or 0.0.2: {raw}")
+    version = match.group("version")
+    return version, f"v{version}"
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def release_url(owner_repo: str, tag: str, artifact_name: str) -> str:
+    return f"https://github.com/{owner_repo}/releases/download/{tag}/{artifact_name}"
+
+
+def replace_line(text: str, pattern: str, replacement: str, label: str) -> str:
+    updated, count = re.subn(pattern, replacement, text, count=1, flags=re.MULTILINE)
+    if count != 1:
+        raise ValueError(f"could not update {label} in formula")
+    return updated
+
+
+def update_formula_text(text: str, *, version: str, url: str, sha256: str) -> str:
+    if not re.fullmatch(r"[0-9a-f]{64}", sha256):
+        raise ValueError("sha256 must be 64 lowercase hex characters")
+    text = replace_line(text, r'^\s*url\s+".*"$', f'  url "{url}"', "url")
+    if re.search(r'^\s*version\s+".*"$', text, flags=re.MULTILINE):
+        text = replace_line(text, r'^\s*version\s+".*"$', f'  version "{version}"', "version")
+    text = replace_line(text, r'^\s*sha256\s+".*"$', f'  sha256 "{sha256}"', "sha256")
+    return text
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Update the Homebrew formula URL and SHA256.")
+    parser.add_argument("--version", required=True, help="Release version, with or without leading v.")
+    parser.add_argument("--artifact", type=Path, required=True, help="Release tarball to checksum.")
+    parser.add_argument("--artifact-name", help="Release asset name. Defaults to artifact basename.")
+    parser.add_argument("--owner-repo", default=DEFAULT_OWNER_REPO)
+    parser.add_argument("--url", help="Override the release asset URL.")
+    parser.add_argument("--formula", type=Path, default=DEFAULT_FORMULA)
+    parser.add_argument("--dry-run", action="store_true", help="Compute and validate without writing.")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    try:
+        version, tag = normalize_version(args.version)
+        if not args.artifact.is_file():
+            raise ValueError(f"artifact does not exist: {args.artifact}")
+        artifact_name = args.artifact_name or args.artifact.name
+        checksum = sha256_file(args.artifact)
+        url = args.url or release_url(args.owner_repo, tag, artifact_name)
+        formula_text = args.formula.read_text(encoding="utf-8")
+        updated = update_formula_text(formula_text, version=version, url=url, sha256=checksum)
+        if not args.dry_run:
+            args.formula.write_text(updated, encoding="utf-8")
+        payload = {
+            "ok": True,
+            "dry_run": args.dry_run,
+            "formula": str(args.formula),
+            "version": version,
+            "tag": tag,
+            "artifact": str(args.artifact),
+            "url": url,
+            "sha256": checksum,
+            "placeholder_replaced": checksum != FORMULA_SHA_PLACEHOLDER,
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    except (OSError, ValueError) as exc:
+        print(json.dumps({"ok": False, "error": str(exc)}, indent=2, sort_keys=True), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
