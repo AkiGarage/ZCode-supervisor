@@ -255,10 +255,11 @@ After the first PyPI release, the shorter package command will be:
 uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REPO
 ```
 
-The PyPI package is published through Trusted Publishing, without long-lived
-PyPI tokens. High-assurance users can also download the GitHub Release archive,
-verify `SHA256SUMS`, and run `gh attestation verify` before using it. Homebrew
-is archived for now; see [docs/distribution.md](docs/distribution.md).
+The PyPI package will be published through Trusted Publishing, without
+long-lived PyPI tokens. High-assurance users can also download the current
+GitHub Release archive, `v0.0.1`, verify `SHA256SUMS`, and run
+`gh attestation verify` before using it. Homebrew is archived for now; see
+[docs/distribution.md](docs/distribution.md).
 
 ### 4. Confirm What Was Written
 

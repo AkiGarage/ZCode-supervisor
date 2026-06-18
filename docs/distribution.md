@@ -24,16 +24,19 @@ uv tool install zcode-supervisor
 zcode-install-repo /absolute/path/to/target-repo
 ```
 
-High-assurance fallback:
+Current high-assurance fallback:
 
 ```bash
-gh release download v0.1.0 \
+gh release download v0.0.1 \
   -R AkiGarage/ZCode-supervisor \
-  -p 'zcode-supervisor-v0.1.0.tar.gz' \
+  -p 'zcode-supervisor-v0.0.1.tar.gz' \
   -p SHA256SUMS
 shasum -a 256 -c SHA256SUMS
-gh attestation verify zcode-supervisor-v0.1.0.tar.gz \
-  -R AkiGarage/ZCode-supervisor
+gh attestation verify zcode-supervisor-v0.0.1.tar.gz \
+  -R AkiGarage/ZCode-supervisor \
+  --source-ref refs/tags/v0.0.1 \
+  --source-digest 6525b8a41371a687a9b9ef3513da38eaab52cf9e \
+  --signer-workflow AkiGarage/ZCode-supervisor/.github/workflows/release-artifacts.yml
 ```
 
 Homebrew is archived for now. Keep the Formula and old release docs only as

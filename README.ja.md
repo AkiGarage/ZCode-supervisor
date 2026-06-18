@@ -250,9 +250,9 @@ uvx --from zcode-supervisor zcode-install-repo /ABSOLUTE/PATH/TO/YOUR/TARGET_REP
 ```
 
 PyPI package は long-lived PyPI token ではなく Trusted Publishing で publish します。
-より慎重な user は GitHub Release archive、`SHA256SUMS`、`gh attestation verify`
-で検証してから使えます。Homebrew は一旦 archived 扱いです。
-[docs/distribution.md](docs/distribution.md) を参照してください。
+より慎重な user は現在の GitHub Release archive `v0.0.1` を download し、
+`SHA256SUMS` と `gh attestation verify` で検証してから使えます。Homebrew は
+一旦 archived 扱いです。[docs/distribution.md](docs/distribution.md) を参照してください。
 
 ### 4. target repo に書かれたものを確認する
 
