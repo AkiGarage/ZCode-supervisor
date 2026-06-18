@@ -45,7 +45,7 @@ helper.
 
 The package must publish through PyPI Trusted Publishing, not a stored PyPI API
 token. The GitHub Actions workflow must use an explicit `pypi` or `testpypi`
-environment plus `id-token: write`, and publish only after Aki approves.
+environment plus `id-token: write`, and publish only after maintainer approval.
 
 ## Safety Contract
 
@@ -98,7 +98,7 @@ zcodectl vision-preflight --workspace /absolute/path/to/target-repo
    high-assurance users.
 
 No step above should rename repos, change visibility, push tags, publish PyPI,
-or publish GitHub Releases without explicit Aki approval.
+or publish GitHub Releases without explicit maintainer approval.
 
 ## References
 

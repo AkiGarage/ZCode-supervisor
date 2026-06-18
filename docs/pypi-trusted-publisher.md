@@ -123,7 +123,7 @@ scripts/check-pypi-release-readiness \
 Only continue if it prints `"safe_to_dispatch": true`.
 
 The `pypi` GitHub environment is restricted to `v*` tags and requires
-`AkiGarage` approval. Dispatch:
+maintainer approval. Dispatch:
 
 ```bash
 gh workflow run pypi-publish.yml \

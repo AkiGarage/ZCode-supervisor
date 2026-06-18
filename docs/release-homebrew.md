@@ -86,7 +86,8 @@ the updater defaults to `AkiGarage/ZCode-supervisor`.
 
 ## Build And Attest Release Artifacts
 
-After Aki approves release creation, create and push a tag such as `v0.0.2`.
+After maintainer approval for release creation, create and push a tag such as
+`v0.0.2`.
 Then run the `Release artifacts` GitHub Actions workflow for that exact tag.
 
 Use:
