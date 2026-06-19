@@ -12,8 +12,19 @@
 ![Node](https://img.shields.io/badge/node-%3E%3D22-339933)
 ![Python](https://img.shields.io/badge/python-%3E%3D3.11-3776AB)
 
-Codex が司令塔と最終監査役として残り、ZCode を境界付きの coding worker
-として使うための supervisor toolkit です。
+ZCode に実装を任せながら、Codex の判断と監査は手放さない。
+
+ZCode-supervisor は、ZCode を「範囲限定の実装 worker」として使うための
+toolkit です。Codex が task を計画し、編集してよい files と validation command
+を決め、結果を監査し、最後の受け入れ判断を持ちます。ZCode には repo 全体を
+自由に触らせず、明確な作業 packet だけを渡します。
+
+AI coding の速度を上げつつ、見張り続ける負担を減らすために作っています。
+
+- routine implementation を ZCode に任せても、Codex review は残せる
+- 編集範囲を explicit files と validation command に閉じ込められる
+- 範囲外変更、failed checks、provider errors、unsafe paths を検出できる
+- target repo は `uvx` 1 command でセットアップし、dry route check から始められる
 
 **Language:** [Switch to English](./README.md)
 

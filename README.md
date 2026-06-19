@@ -13,8 +13,20 @@
 ![Node](https://img.shields.io/badge/node-%3E%3D22-339933)
 ![Python](https://img.shields.io/badge/python-%3E%3D3.11-3776AB)
 
-Codex-side tooling for using ZCode as a bounded coding worker while Codex stays
-the orchestrator and final auditor.
+Use ZCode for the coding work without giving up Codex's judgment.
+
+ZCode-supervisor turns ZCode into a bounded implementation worker: Codex plans
+the task, chooses the allowed files, runs validation, audits the result, and
+keeps final acceptance. ZCode gets a narrow packet of work instead of an open
+repo and cannot silently drift outside the scope you approved.
+
+It is built for developers who want more useful AI throughput with less
+supervision:
+
+- hand routine implementation to ZCode without losing Codex review
+- keep edits scoped to explicit files and validation commands
+- catch out-of-scope changes, failed checks, provider errors, and unsafe paths
+- set up a target repo with one `uvx` command and start with a dry route check
 
 **日本語版はこちら:** [README.ja.md を開く](./README.ja.md)
 
